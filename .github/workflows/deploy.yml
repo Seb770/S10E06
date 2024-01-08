@@ -7,10 +7,6 @@ on:
     tags:
       - '*'
   workflow_dispatch:
-
-branding:
-  icon: 'box'
-  color: 'blue'
 inputs:
   image_name:
     description: 'Name of the Docker image'
