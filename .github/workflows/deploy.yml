@@ -1,0 +1,39 @@
+name: 'Build and Push Docker Image'
+description: 'Builds and pushes a Docker image to ghcr.io'
+on:
+  push:
+    branches:
+      - 'master'
+    tags:
+      - '*'
+  workflow_dispatch:
+
+branding:
+  icon: 'box'
+  color: 'blue'
+inputs:
+  image_name:
+    description: 'lolcat image'
+    required: true
+    default: 'lolcat'
+  tag:
+    description: 'Docker image tag'
+    required: false
+    default: ${{ github.ref_slug }}
+  context:
+    description: 'Build context'
+    required: false
+    default: '.'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+    - name: Build and Push Docker Image
+      run: |
+        docker build -t ${{ inputs.image_name }}:${{ inputs.tag }} ${{ inputs.context }}
+        docker tag ${{ inputs.image_name }}:${{ inputs.tag }} ghcr.io/${{ github.repository_owner }}/${{ inputs.image_name }}:${{ inputs.tag }}
+        echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+        docker push ghcr.io/${{ github.repository_owner }}/${{ inputs.image_name }}:${{ inputs.tag }}
+
